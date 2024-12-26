@@ -1,0 +1,44 @@
+﻿@page "/Students"
+@inject HttpClient Http
+@using Lab5Client.DataAccess.Model
+<h3>Учебная карточка ученика</h3>
+
+<label>Идентификатор ученика:</label>
+<input type="number" @bind="studentId" />
+
+<button @onclick="LoadStudentCard">Показать</button>
+
+@if (grades == null)
+{
+    <p>Загрузка...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Предмет</th>
+                <th>Средний балл</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var grade in grades)
+            {
+                <tr>
+                    <td>@grade.Subject.Name</td>
+                    <td>@grade.Value</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private int studentId;
+    private List<Grade>? grades;
+
+    private async Task LoadStudentCard()
+    {
+        grades = await Http.GetFromJsonAsync<List<Grade>>($"Students/{studentId}/Card");
+    }
+}

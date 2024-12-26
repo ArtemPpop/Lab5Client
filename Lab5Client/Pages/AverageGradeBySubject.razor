@@ -1,0 +1,28 @@
+﻿@page "/Students"
+@inject HttpClient Http
+@using Lab5Client.DataAccess.Model
+<h3>Средний балл по предмету</h3>
+
+<label>Предмет:</label>
+<input type="text" @bind="selectedSubject" />
+
+<button @onclick="CalculateAverage">Рассчитать</button>
+
+@if (averageGrade == null)
+{
+    <p>Загрузка...</p>
+}
+else
+{
+    <p>Средний балл по предмету: @averageGrade</p>
+}
+
+@code {
+    private string selectedSubject = string.Empty;
+    private double? averageGrade;
+
+    private async Task CalculateAverage()
+    {
+        averageGrade = await Http.GetFromJsonAsync<double>($"Grades/AverageBySubject?subject={selectedSubject}");
+    }
+}

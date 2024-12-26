@@ -1,0 +1,42 @@
+﻿@page "/Students"
+@inject HttpClient Http
+@using Lab5Client.DataAccess.Model
+<h3>Список преподавателей для класса</h3>
+
+<label>Класс:</label>
+<input type="number" @bind="selectedClass" />
+
+<button @onclick="LoadTeachers">Показать</button>
+
+@if (teachers == null)
+{
+    <p>Загрузка...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Имя</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var teacher in teachers)
+            {
+                <tr>
+                    <td>@teacher.Name</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private int selectedClass;
+    private List<Teacher>? teachers;
+
+    private async Task LoadTeachers()
+    {
+        teachers = await Http.GetFromJsonAsync<List<Teacher>>($"Teachers/ByClass?class={selectedClass}");
+    }
+}

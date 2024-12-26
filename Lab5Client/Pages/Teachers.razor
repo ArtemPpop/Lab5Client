@@ -1,0 +1,37 @@
+﻿@page "/Students"
+@inject HttpClient Http
+@using Lab5Client.DataAccess.Model
+
+<h3>Список учителей</h3>
+
+@if (teachers == null)
+{
+    <p>Загрузка...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Имя</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var teacher in teachers)
+            {
+                <tr>
+                    <td>@teacher.Name</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Teacher>? teachers;
+
+    protected override async Task OnInitializedAsync()
+    {
+        teachers = await Http.GetFromJsonAsync<List<Teacher>>("Teachers/all");
+    }
+}

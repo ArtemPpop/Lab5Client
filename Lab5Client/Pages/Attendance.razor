@@ -1,0 +1,37 @@
+﻿@page "/Students"
+@inject HttpClient Http
+@using Lab5Client.DataAccess.Model
+
+<h3>Количество пропусков</h3>
+
+<label>Класс:</label>
+<input type="number" @bind="selectedClass" />
+
+<label>Начало периода:</label>
+<input type="date" @bind="startDate" />
+
+<label>Конец периода:</label>
+<input type="date" @bind="endDate" />
+
+<button @onclick="LoadAttendance">Рассчитать</button>
+
+@if (absenceCount == null)
+{
+    <p>Загрузка...</p>
+}
+else
+{
+    <p>Количество пропусков: @absenceCount</p>
+}
+
+@code {
+    private int selectedClass;
+    private DateTime startDate;
+    private DateTime endDate;
+    private int? absenceCount;
+
+    private async Task LoadAttendance()
+    {
+        absenceCount = await Http.GetFromJsonAsync<int>($"Attendance?class={selectedClass}&start={startDate}&end={endDate}");
+    }
+}

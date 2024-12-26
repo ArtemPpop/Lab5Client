@@ -1,0 +1,49 @@
+﻿@page "/Students"
+@inject HttpClient Http
+@using Lab5Client.DataAccess.Model
+
+<h3>Журнал для класса</h3>
+
+<label>Класс:</label>
+<input type="number" @bind="selectedClass" />
+
+<label>Предмет:</label>
+<input type="text" @bind="selectedSubject" />
+
+<button @onclick="LoadJournal">Загрузить</button>
+
+@if (grades == null)
+{
+    <p>Загрузка...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Ученик</th>
+                <th>Оценка</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var grade in grades)
+            {
+                <tr>
+                    <td>@grade.Student.Name</td>
+                    <td>@grade.Value</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private int selectedClass;
+    private string selectedSubject = string.Empty;
+    private List<Grade>? grades;
+
+    private async Task LoadJournal()
+    {
+        grades = await Http.GetFromJsonAsync<List<Grade>>($"Journal?class={selectedClass}&subject={selectedSubject}");
+    }
+}

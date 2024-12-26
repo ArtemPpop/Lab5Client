@@ -1,0 +1,34 @@
+﻿@page "/Students"
+@inject HttpClient Http
+@using Lab5Client.DataAccess.Model
+
+<h3>Список предметов для класса</h3>
+
+<label>Класс:</label>
+<input type="number" @bind="selectedClass" />
+
+<button @onclick="LoadSubjects">Показать</button>
+
+@if (subjects == null)
+{
+    <p>Загрузка...</p>
+}
+else
+{
+    <ul>
+        @foreach (var subject in subjects)
+        {
+            <li>@subject.Name</li>
+        }
+    </ul>
+}
+
+@code {
+    private int selectedClass;
+    private List<Subject>? subjects;
+
+    private async Task LoadSubjects()
+    {
+        subjects = await Http.GetFromJsonAsync<List<Subject>>($"Subjects/ByClass?class={selectedClass}");
+    }
+}
