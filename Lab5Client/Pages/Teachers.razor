@@ -1,6 +1,8 @@
-﻿@page "/Students"
+@page "/Teachers"
 @inject HttpClient Http
 @using Lab5Client.DataAccess.Model
+@using Lab5Client.DataAccess
+@using System.Linq
 
 <h3>Список учителей</h3>
 
@@ -14,6 +16,7 @@ else
         <thead>
             <tr>
                 <th>Имя</th>
+                <th>Предметы</th>
             </tr>
         </thead>
         <tbody>
@@ -21,6 +24,16 @@ else
             {
                 <tr>
                     <td>@teacher.Name</td>
+                    <td>
+                        @if (teacher.Subjects != null && teacher.Subjects.Any())
+                        {
+                            @string.Join(", ", teacher.Subjects.Select(s => s.Name))
+                        }
+                        else
+                        {
+                            <span>Нет предметов</span>
+                        }
+                    </td>
                 </tr>
             }
         </tbody>
@@ -32,6 +45,27 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        teachers = await Http.GetFromJsonAsync<List<Teacher>>("Teachers/all");
+        await LoadTeachers();
+    }
+
+    private async Task LoadTeachers()
+    {
+        try
+        {
+            string query = @"query {
+                teachers {
+                    teacherId
+                    name
+                    subjects {
+                        name
+                    }
+                }
+            }";
+            teachers = await Query.ExecuteQueryReturnListAsync<Teacher>("teachers", query);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
     }
 }
