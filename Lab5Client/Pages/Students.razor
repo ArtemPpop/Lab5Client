@@ -1,11 +1,14 @@
-﻿@page "/Students"
+@page "/Students"
 @inject HttpClient Http
 @using Lab5Client.DataAccess.Model
+@using Lab5Client.DataAccess
+@using System.Net.Http.Json
+@using System.Linq
 
 <h3>Список учеников</h3>
 
 @if (students == null)
-{
+{   
     <p>Загрузка...</p>
 }
 else
@@ -16,6 +19,8 @@ else
                 <th>Имя</th>
                 <th>Класс</th>
                 <th>Дата рождения</th>
+                <th>Оценки</th>
+                <th>Пропуски</th>
             </tr>
         </thead>
         <tbody>
@@ -25,6 +30,27 @@ else
                     <td>@student.Name</td>
                     <td>@student.NumberClass</td>
                     <td>@student.DateOfBirth?.ToString("d")</td>
+                    <td>
+                        @if (student.Grades != null && student.Grades.Any())
+                        {
+                            @string.Join(", ", student.Grades.Select(g => $"{g.Subject?.Name}: {g.Value}"))
+                        }
+                        else
+                        {
+                            <span>Нет оценок</span>
+                        }
+                    </td>
+                    <td>
+                        @if (student.Attendances != null)
+                        {
+                            var absences = student.Attendances.Count(a => !a.IsPresent); 
+                            @absences
+                        }
+                        else
+                        {
+                            <span>Нет данных</span>
+                        }
+                    </td>
                 </tr>
             }
         </tbody>
@@ -36,6 +62,39 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        students = await Http.GetFromJsonAsync<List<Student>>("Students/all");
+        await LoadStudents();
+    }
+
+    private async Task LoadStudents()
+    {
+        try
+        {
+            string query = @"
+            query {
+                students {
+                    studentId
+                    name
+                    numberClass
+                    dateOfBirth
+                    grades {
+                        subject {
+                            name
+                        }
+                        value
+                    }
+                    attendances {
+                        date
+                        isPresent
+                    }
+                }
+            }";
+
+            var result = await Query.ExecuteQueryReturnListAsync<Student>("students", query);
+            students = result;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
     }
 }
